@@ -16,7 +16,18 @@ A macOS/iOS app for displaying current times across multiple cities worldwide.
 - Xcode 14.0 or later
 - Swift 5.7 or later
 
-## Installation & Running
+## Download
+
+Grab the latest build from the
+[Releases page](https://github.com/shinjiksi/World-Clock-App-for-Mac/releases):
+
+1. Download the `.zip` and unzip it
+2. Drag `World Clock.app` to `/Applications`
+3. **Right-click → Open** the first time — this build isn't notarized (no
+   paid Apple Developer account), so Gatekeeper will otherwise block it as
+   "unidentified developer"; right-click Open bypasses that one-time warning
+
+## Building from source
 
 ### 1. Open the Project
 
@@ -63,15 +74,16 @@ City list is managed in `CityManager.swift`.
 
 Edit the main UI in `MainView.swift`.
 
-## Distribution
+## Releasing
 
-### Distribute as macOS App
+Push a tag matching `v*` (e.g. `git tag v1.2 && git push origin v1.2`) and a
+GitHub Actions workflow (`.github/workflows/release.yml`) builds a universal
+binary (Apple Silicon + Intel), ad-hoc signs it, zips it, and publishes a
+GitHub Release automatically with the zip attached.
 
-1. In Xcode, select **Product → Archive**
-2. Choose **Distribute App**
-3. Select distribution method:
-   - **Direct Distribution**: Distribute as .app file
-   - **Developer ID**: Notarized app (recommended)
+Bump `MARKETING_VERSION` in `World Clock.xcodeproj/project.pbxproj` to match
+the tag before tagging — `Info.plist`'s `CFBundleShortVersionString` reads
+from it directly.
 
 ### Publish to App Store
 

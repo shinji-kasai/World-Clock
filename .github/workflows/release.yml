@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode/SDK versions
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+
+      - name: Build Release (ad-hoc signed, universal binary)
+        run: |
+          xcodebuild \
+            -project "World Clock.xcodeproj" \
+            -scheme "World Clock" \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
+            build
+
+      - name: Locate and zip built app
+        id: package
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -type d -name "World Clock.app" -path "*/Release/*" | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "World Clock.app not found under DerivedData" >&2
+            exit 1
+          fi
+          VERSION="${GITHUB_REF_NAME#v}"
+          ZIP_NAME="World-Clock-${VERSION}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_NAME"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.zip_name }}
+          name: "World Clock ${{ github.ref_name }}"
+          body: |
+            ## Installing
+            1. Download the `.zip` below and unzip it
+            2. Drag `World Clock.app` to `/Applications`
+            3. **Right-click → Open** the first time (this build isn't notarized, so Gatekeeper otherwise blocks it as "unidentified developer" — right-click Open bypasses that one-time warning)
+
+            ## Notes
+            - Universal binary (Apple Silicon + Intel)
+            - Not sandboxed, not App Store distributed — personal-use build, ad-hoc signed

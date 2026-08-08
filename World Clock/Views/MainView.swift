@@ -25,8 +25,20 @@ struct MainView: View {
     var groupedUnselectedCities: [String: [City]] {
         Dictionary(grouping: unselectedCities) { $0.region }
     }
-    
-    let regionOrder = ["Japan", "United States", "Canada", "Philippines", "Mexico", "World"]
+
+    // Derived from the catalog (in first-appearance order) rather than
+    // hardcoded, so a region never silently goes unrendered when new
+    // cities/regions are added to CityManager.
+    var regionOrder: [String] {
+        var seen = Set<String>()
+        var order: [String] = []
+        for city in cityManager.cities {
+            if seen.insert(city.region).inserted {
+                order.append(city.region)
+            }
+        }
+        return order
+    }
     
     var body: some View {
         VStack(spacing: 0) {
