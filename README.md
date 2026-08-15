@@ -19,7 +19,7 @@ A macOS/iOS app for displaying current times across multiple cities worldwide.
 ## Download
 
 Grab the latest build from the
-[Releases page](https://github.com/shinjiksi/World-Clock-App-for-Mac/releases):
+[Releases page](https://github.com/shinji-kasai/World-Clock/releases):
 
 1. Download the `.zip` and unzip it
 2. Drag `World Clock.app` to `/Applications`
